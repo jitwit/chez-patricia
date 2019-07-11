@@ -1,0 +1,99 @@
+#+title: Patricia Trees
+
+* What are patricia trees?
+
+  Fast Mergeable Integer Maps! Patricia trees are binary tries,
+  augmented with two additional pieces of information. One is a mask,
+  which indicates the longest common prefix of the subtrees, and the
+  other is a bit index, which determines which bit to test when
+  performing operations.
+
+  The prefix facilitates two nice tricks. Fast merging comes from the
+  fact that two trees whose prefixes disagree may be merged by wrapping
+  them in a new node. Also, restricted to nonnegative keys, these trees
+  are binary search trees. Lookups may be performed by comparison
+  instead of testing the bit index.
+
+  See Chris Okasaki and Andy Gill's paper [[http://ittc.ku.edu/~andygill/papers/IntMap98.pdf][Fast Mergeable Integer Maps]]
+  for correct and complete details.
+
+  #+begin_src scheme :exports both :session patricia
+;; (load "./patricia.scm")
+(import (chez patricia))
+(library-exports '(chez patricia))
+  #+end_src 
+
+  #+RESULTS:
+  : (view-tree predecessor successor tree-imap tree-map
+  :  tree-ifold-right tree-ifold-left tree-fold-left
+  :  tree-fold-right tree->keys tree->alist singleton
+  :  symmetric-difference difference intersection-with
+  :  intersect-with union-with merge-with delete insert
+  :  insert-with lookup empty? tree-equal? patricia-tree?
+  :  empty-tree)
+
+
+  Here is an example that illustrates how things are
+  working. ~view-tree~ converts the prefixes to strings base two. In
+  the rightmost branch, we can see how 12 and 14 first differ at bit
+  position 1.
+
+  #+begin_src scheme :exports both :session patricia
+(define (list->tree L)
+  (fold-right (lambda (x T)
+		(insert x (number->string x 2) T))
+	      empty-tree
+	      L))
+
+(define (K x y) x)
+
+(define X
+  (list->tree '(3 4 12 14)))
+
+(define Y
+  (list->tree '(1 3 4 12 15)))
+
+(view-tree X)
+  #+end_src 
+
+  #+RESULTS:
+  : (branch
+  :   "111"
+  :   3
+  :   (branch "11" 2 (3 . "11") (4 . "100"))
+  :   (branch "1101" 1 (12 . "1100") (14 . "1110")))
+
+
+* Sanity checks 
+
+  Set operations:
+
+ #+begin_src scheme :exports both :session patricia
+(map tree->keys
+     (list X
+	   Y
+	   (intersect-with K X Y)
+	   (union-with K X Y)
+	   (difference X Y)
+	   (difference Y X)
+	   (symmetric-difference X Y)))
+ #+end_src
+
+  #+RESULTS:
+  : ((3 4 12 14) (1 3 4 12 15) (3 4 12) (1 3 4 12 14 15) (14)
+  :   (1 15) (1 14 15))
+
+  Folds:
+ #+begin_src scheme :exports both :session patricia
+(list (tree-fold-right cons '() (list->tree (iota 5)))
+      (tree-ifold-right cons* '() (list->tree (iota 5)))
+      (tree-fold-left cons '() (list->tree (iota 5)))
+      (tree-ifold-left cons* '() (list->tree (iota 5))))
+ #+end_src
+
+ #+RESULTS:
+ : (("0" "1" "10" "11" "100")
+ :   (0 "0" 1 "1" 2 "10" 3 "11" 4 "100")
+ :   (((((() . "0") . "1") . "10") . "11") . "100")
+ :   (((((() 0 . "0") 1 . "1") 2 . "10") 3 . "11") 4 . "100"))
+
