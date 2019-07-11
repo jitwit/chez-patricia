@@ -17,6 +17,9 @@
 	  singleton
 	  tree->alist
 	  tree->keys
+	  tree->items
+	  tree-ifilter
+	  tree-filter
 	  tree-fold-right
 	  tree-fold-left
 	  tree-ifold-left

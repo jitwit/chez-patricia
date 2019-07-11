@@ -260,6 +260,37 @@
   (lambda (key item)
     (insert key item empty-tree)))
 
+(define tree-ifilter
+  (lambda (predicate T)
+    (define (aux T)
+      (cond ((patricia? T)
+	     (make-tree (patricia-p T)
+			(patricia-b T)
+			(aux (patricia-L T))
+			(aux (patricia-R T))))
+	    ((patricia-leaf? T)
+	     (if (predicate (patricia-leaf-key T)
+			    (patricia-leaf-item T))
+		 T
+		 empty-tree))
+	    (else empty-tree)))
+    (aux T)))
+
+(define tree-filter
+  (lambda (predicate T)
+    (define (aux T)
+      (cond ((patricia? T)
+	     (make-tree (patricia-p T)
+			(patricia-b T)
+			(aux (patricia-L T))
+			(aux (patricia-R T))))
+	    ((patricia-leaf? T)
+	     (if (predicate (patricia-leaf-item T))
+		 T
+		 empty-tree))
+	    (else empty-tree)))
+    (aux T)))
+
 (define tree->alist
   (lambda (T)
     (tree-ifold-right (lambda (k v T)
@@ -270,11 +301,14 @@
 
 (define tree->keys
   (lambda (T)
-    (if (patricia? T)
-	(append (tree->keys (patricia-L T)) (tree->keys (patricia-R T)))
-	(or (and (patricia-leaf? T)
-		 (list (patricia-leaf-key T)))
-	    '()))))
+    (tree-ifold-right (lambda (k ignore keys)
+			(cons k keys))
+		      '()
+		      T)))
+
+(define tree->items
+  (lambda (T)
+    (tree-fold-right cons '() T)))
 
 (define leaf->pair
   (lambda (L)
@@ -394,6 +428,15 @@
 			       (insert-with + x 1 T))
 			     empty-tree
 			     X)))))
+
+(define node-count
+  (lambda (T)
+    (cond ((patricia? T)
+	   (+ 1
+	      (node-count (patricia-L T))
+	      (node-count (patricia-R T))))
+	  ((patricia-leaf? T) 1)
+	  (else 0))))
 
 (define view-tree
   (lambda (T)
