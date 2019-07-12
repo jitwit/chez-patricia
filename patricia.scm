@@ -28,10 +28,18 @@
 
 ;; p for prefix, b for branching bit, capital letter to indicate sub-structure
 (define-record-type patricia
+  (nongenerative)
   (fields p b L R))
 
+(record-type-equal-procedure (record-type-descriptor patricia)
+			     tree-equal?)
+
 (define-record-type patricia-leaf
+  (nongenerative)
   (fields key item))
+
+(record-type-equal-procedure (record-type-descriptor patricia-leaf)
+			     tree-equal?)
 
 (define empty-tree 'empty-tree)
 
@@ -308,15 +316,15 @@
 	  (patricia-leaf-item L))))
 
 (define tree-equal?
-  (lambda (S T)
+  (lambda (S T eql?)
     (cond ((and (patricia? S) (patricia? T))
-	   (and (= (patricia-p S) (patricia-p T))
-		(= (patricia-b S) (patricia-b T))
-		(tree-equal? (patricia-L S) (patricia-L T))
-		(tree-equal? (patricia-R S) (patricia-R T))))
+	   (and (eql? (patricia-p S) (patricia-p T))
+		(eql? (patricia-b S) (patricia-b T))
+		(tree-equal? (patricia-L S) (patricia-L T) eql?)
+		(tree-equal? (patricia-R S) (patricia-R T) eql?)))
 	  ((and (patricia-leaf? S) (patricia-leaf? T))
-	   (and (= (patricia-leaf-key S) (patricia-leaf-key T))
-		(equal? (patricia-leaf-item S) (patricia-leaf-item T))))
+	   (and (eql? (patricia-leaf-key S) (patricia-leaf-key T))
+		(eql? (patricia-leaf-item S) (patricia-leaf-item T))))
 	  (else (and (empty? S) (empty? T))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -347,6 +355,18 @@
 				 (proc (patricia-leaf-key T)
 				       (patricia-leaf-item T))))
 	    (else T)))
+    (aux tree)))
+
+(define tree-for-each
+  (lambda (proc tree)
+    (define (aux T)
+      (cond ((patricia? T) 
+	     (aux (patricia-L T))
+	     (aux (patricia-R T)))
+	    ((patricia-leaf? T) 
+	     (proc (patricia-leaf-key T)
+		   (patricia-leaf-item T)))
+	    (else (void))))
     (aux tree)))
 
 (define tree-fold-right

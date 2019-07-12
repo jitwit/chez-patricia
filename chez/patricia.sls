@@ -2,7 +2,6 @@
   (export empty?
 	  empty-tree
 	  patricia-tree?
-	  tree-equal?
 	  empty?
 	  lookup
 	  insert-with
@@ -24,6 +23,7 @@
 	  tree-fold-left
 	  tree-ifold-left
 	  tree-ifold-right
+	  tree-for-each
 	  tree-map
 	  tree-imap
 	  successor
