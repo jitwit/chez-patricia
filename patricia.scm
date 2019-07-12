@@ -189,13 +189,9 @@
 	       (cond ((and (= p q) (= b c))
 		      (make-tree p b (aux Sl Tl) (aux Sr Tr)))
 		     ((and (< b c) (match-prefix* p q c))
-		      (if (logbit? b q)
-			  (aux S Tr) 
-			  (aux S Tl)))
+		      (make-patricia q c (aux S Tl) (aux S Tr)))
 		     ((and (< c b) (match-prefix* q p b))
-		      (if (logbit? c p)
-			  (aux Sr T)
-			  (aux Sl T)))
+		      (make-patricia p b (aux Sl T) (aux Sr T)))
 		     (else empty-tree))))))
     (aux S T)))
 
@@ -428,6 +424,15 @@
 			       (insert-with + x 1 T))
 			     empty-tree
 			     X)))))
+
+(define tree-size
+  (lambda (T)
+    (define (aux T)
+      (cond ((patricia? T)
+	     (+ (aux (patricia-L T)) (aux (patricia-R T))))
+	    ((patricia-leaf? T) 1)
+	    (else 0)))
+    (aux T)))
 
 (define node-count
   (lambda (T)
