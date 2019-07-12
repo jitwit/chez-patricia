@@ -1,6 +1,3 @@
-;; this uses no fx* operations, to work over arbitrarily large
-;; nonnegative integers. fx ints are limited to 2^60, i believe.
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Bit goods                                                                  ;;
 
@@ -8,15 +5,13 @@
   (lambda (k b)
     (logbit0 b (logor k (1- (ash 1 b))))))
 
-(define match-prefix
-  (lambda (key Tree)
-    (= (mask key (patricia-b Tree))
-       (patricia-p Tree))))
-
-;; masked by b, does k get prefix p?
-(define match-prefix*
-  (lambda (k p b)
-    (= (mask k b) p)))
+(define-syntax match-prefix
+  (syntax-rules ()
+    ((_ k p b)
+     (= (mask k b) p))
+    ((_ k T)
+     (= (mask k (patricia-b T))
+	(patricia-p T)))))
 
 ;; branching bit: first bit where p1 p2 disagree
 (define branching-bit
@@ -28,20 +23,28 @@
 
 ;; p for prefix, b for branching bit, capital letter to indicate sub-structure
 (define-record-type patricia
-  (nongenerative)
   (fields p b L R))
 
-(record-type-equal-procedure (record-type-descriptor patricia)
-			     tree-equal?)
-
 (define-record-type patricia-leaf
-  (nongenerative)
   (fields key item))
 
-(record-type-equal-procedure (record-type-descriptor patricia-leaf)
-			     tree-equal?)
+(define tree-equal?
+  (lambda (S T eql?)
+    (cond ((and (patricia? S) (patricia? T))
+	   (and (eql? (patricia-p S) (patricia-p T))
+		(eql? (patricia-b S) (patricia-b T))
+		(tree-equal? (patricia-L S) (patricia-L T) eql?)
+		(tree-equal? (patricia-R S) (patricia-R T) eql?)))
+	  ((and (patricia-leaf? S) (patricia-leaf? T))
+	   (and (eql? (patricia-leaf-key S) (patricia-leaf-key T))
+		(eql? (patricia-leaf-item S) (patricia-leaf-item T))))
+	  (else (and (empty? S) (empty? T))))))
 
 (define empty-tree 'empty-tree)
+
+(define empty?
+  (lambda (Tree)
+    (eq? Tree empty-tree)))
 
 ;; called when prefixes disagree
 (define join
@@ -61,10 +64,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Queries                                                                    ;;
-
-(define empty?
-  (lambda (Tree)
-    (eq? Tree empty-tree)))
 
 (define patricia-tree?
   (lambda (T)
@@ -134,11 +133,11 @@
 		   (Tr (patricia-R T)))
 	       (cond ((and (= p q) (= b c))
 		      (make-patricia p b (aux Sl Tl) (aux Sr Tr)))
-		     ((and (< b c) (match-prefix* p q c))
+		     ((and (< b c) (match-prefix p q c))
 		      (if (logbit? c p)
 			  (make-patricia q c Tl (aux S Tr))
 			  (make-patricia q c (aux Tl S) Tr)));; Tl before s?
-		     ((and (< c b) (match-prefix* q p b))
+		     ((and (< c b) (match-prefix q p b))
 		      (if (logbit? b q)
 			  (make-patricia p b Sl (aux Sr T))
 			  (make-patricia p b (aux Sl T) Sr)))
@@ -196,9 +195,9 @@
 		   (Tr (patricia-R T)))
 	       (cond ((and (= p q) (= b c))
 		      (make-tree p b (aux Sl Tl) (aux Sr Tr)))
-		     ((and (< b c) (match-prefix* p q c))
+		     ((and (< b c) (match-prefix p q c))
 		      (make-patricia q c (aux S Tl) (aux S Tr)))
-		     ((and (< c b) (match-prefix* q p b))
+		     ((and (< c b) (match-prefix q p b))
 		      (make-patricia p b (aux Sl T) (aux Sr T)))
 		     (else empty-tree))))))
     (aux S T)))
@@ -226,9 +225,9 @@
 		   (Tr (patricia-R T)))
 	       (cond ((and (= p q) (= b c))
 		      (make-tree p b (aux Sl Tl) (aux Sr Tr)))
-		     ((and (< b c) (match-prefix* p q c))
+		     ((and (< b c) (match-prefix p q c))
 		      (make-patricia p b (aux Sl T) (aux Sr T)))
-		     ((and (< c b) (match-prefix* q p b))
+		     ((and (< c b) (match-prefix q p b))
 		      (make-patricia p b (aux Sl T) (aux Sr T)))
 		     (else S))))))
     (aux S T)))
@@ -314,18 +313,6 @@
   (lambda (L)
     (cons (patricia-leaf-key L)
 	  (patricia-leaf-item L))))
-
-(define tree-equal?
-  (lambda (S T eql?)
-    (cond ((and (patricia? S) (patricia? T))
-	   (and (eql? (patricia-p S) (patricia-p T))
-		(eql? (patricia-b S) (patricia-b T))
-		(tree-equal? (patricia-L S) (patricia-L T) eql?)
-		(tree-equal? (patricia-R S) (patricia-R T) eql?)))
-	  ((and (patricia-leaf? S) (patricia-leaf? T))
-	   (and (eql? (patricia-leaf-key S) (patricia-leaf-key T))
-		(eql? (patricia-leaf-item S) (patricia-leaf-item T))))
-	  (else (and (empty? S) (empty? T))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Maps, folds, and misc.                                                     ;;

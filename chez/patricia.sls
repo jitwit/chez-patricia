@@ -1,7 +1,9 @@
+
 (library (chez patricia)
   (export empty?
 	  empty-tree
 	  patricia-tree?
+	  tree-equal?
 	  empty?
 	  lookup
 	  insert-with
@@ -30,9 +32,8 @@
 	  predecessor
 	  minimum
 	  maximum
+	  tree-size
 	  view-tree)
   (import (chezscheme))
-
-  (include "patricia.scm")
-  
-  )
+  (eval-when (compile) (optimize-level 3))
+  (include "patricia.scm"))
