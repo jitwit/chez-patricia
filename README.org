@@ -24,8 +24,8 @@
   #+end_src 
 
   #+RESULTS:
-  : (view-tree predecessor successor tree-imap tree-map
-  :  tree-ifold-right tree-ifold-left tree-fold-left
+  : (view-tree maximum minimum predecessor successor tree-imap
+  :  tree-map tree-ifold-right tree-ifold-left tree-fold-left
   :  tree-fold-right tree-filter tree-ifilter tree->items
   :  tree->keys tree->alist singleton symmetric-difference
   :  difference intersection-with intersect-with union-with
@@ -34,9 +34,7 @@
 
 
   Here is an example that illustrates how things are
-  working. ~view-tree~ converts the prefixes to strings base two. In
-  the rightmost branch, we can see how 12 and 14 first differ at bit
-  position 1.
+  working. ~view-tree~ converts the prefixes to strings base two. 
 
   #+begin_src scheme :exports both :session patricia
 (define (list->tree L)

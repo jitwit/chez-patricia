@@ -129,7 +129,7 @@
 		     ((and (< b c) (match-prefix* p q c))
 		      (if (logbit? c p)
 			  (make-patricia q c Tl (aux S Tr))
-			  (make-patricia q c (aux Tl S) Tr)))
+			  (make-patricia q c (aux Tl S) Tr)));; Tl before s?
 		     ((and (< c b) (match-prefix* q p b))
 		      (if (logbit? b q)
 			  (make-patricia p b Sl (aux Sr T))
@@ -397,6 +397,20 @@
 	    (or (successor key (patricia-L T))
 		(successor key (patricia-R T))))
 	(and (< key (patricia-leaf-key T))
+	     (leaf->pair T)))))
+
+(define minimum
+  (lambda (T)
+    (if (patricia? T)
+	(minimum (patricia-L T))
+	(and (patricia-leaf? T)
+	     (leaf->pair T)))))
+
+(define maximum
+  (lambda (T)
+    (if (patricia? T)
+	(maximum (patricia-R T))
+	(and (patricia-leaf? T)
 	     (leaf->pair T)))))
 
 (define predecessor

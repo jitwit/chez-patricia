@@ -28,6 +28,8 @@
 	  tree-imap
 	  successor
 	  predecessor
+	  minimum
+	  maximum
 	  view-tree)
   (import (chezscheme))
 
