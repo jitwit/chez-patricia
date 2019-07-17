@@ -8,10 +8,13 @@
 (define-syntax match-prefix
   (syntax-rules ()
     ((_ k p b)
-     (= (mask k b) p))
+     (= (logbit0 b (logor k (1- (ash 1 b))))
+	p))
     ((_ k T)
-     (= (mask k (patricia-b T))
-	(patricia-p T)))))
+     (let ((b (patricia-b T))
+	   (p (patricia-p T)))
+       (= (logbit0 b (logor k (1- (ash 1 b))))
+	  p)))))
 
 ;; branching bit: first bit where p1 p2 disagree
 (define branching-bit

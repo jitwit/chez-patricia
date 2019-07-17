@@ -1,3 +1,4 @@
+(eval-when (compile) (optimize-level 3))
 
 (library (chez patricia)
   (export empty?
@@ -35,5 +36,5 @@
 	  tree-size
 	  view-tree)
   (import (chezscheme))
-  (eval-when (compile) (optimize-level 3))
+  
   (include "patricia.scm"))
