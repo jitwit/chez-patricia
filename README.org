@@ -2,17 +2,18 @@
 
 * What are patricia trees?
 
-  Fast Mergeable Integer Maps! Patricia trees are binary tries,
-  augmented with two additional pieces of information. One is a mask,
-  which indicates the longest common prefix of the subtrees, and the
-  other is a bit index, which determines which bit to test when
-  performing operations.
+  Fast Mergeable Integer Maps! Patricia trees are binary tries that
+  support fast aggregate set operations and decently fast map
+  operations.
 
-  The prefix facilitates two nice tricks. Fast merging comes from the
-  fact that two trees whose prefixes disagree may be merged by wrapping
-  them in a new node. Also, restricted to nonnegative keys, these trees
-  are binary search trees. Lookups may be performed by comparison
-  instead of testing the bit index.
+  The branches are augmented with two additional pieces of
+  information. One is a mask, which indicates the longest common
+  prefix of the subtrees, and the other is a bit index, which
+  determines which bit to test when querying.
+
+  The prefix facilitates fast set operations. For example, fast
+  merging comes from the fact that two trees whose prefixes disagree
+  can be merged simply by wrapping them in a new node.
 
   See Chris Okasaki and Andy Gill's paper [[http://ittc.ku.edu/~andygill/papers/IntMap98.pdf][Fast Mergeable Integer Maps]]
   for correct and complete details.
@@ -34,8 +35,8 @@
   :  empty-tree)
 
 
-  Here is an example that illustrates how things are
-  working. ~view-tree~ converts the prefixes to strings base two. 
+  Here is an example that illustrates how it works. ~view-tree~
+  converts the prefixes to strings base two. 
 
   #+begin_src scheme :exports both :session patricia
 (define (list->tree L)
@@ -43,8 +44,6 @@
 		(insert x (number->string x 2) T))
 	      empty-tree
 	      L))
-
-(define (K x y) x)
 
 (define X
   (list->tree '(3 4 12 14)))
@@ -68,6 +67,8 @@
   Set operations:
 
  #+begin_src scheme :exports both :session patricia
+(define (K x y) x)
+
 (map tree->keys
      (list X
 	   Y

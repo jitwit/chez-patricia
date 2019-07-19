@@ -18,9 +18,11 @@
 		   (insert (random lim) n x)))))))
 
 ;; check random trees by comparing against srfi 1 and hashmaps
-(define tree-1 (random-tree 40000 10000 0 'yes))
+(define *range* 7000000)
+(define *items* 150000)
+(define tree-1 (random-tree *range* *items* 0 'yes))
 (define list-1 (tree->keys tree-1))
-(define tree-2 (random-tree 40000 10000 0 'yes))
+(define tree-2 (random-tree *range* *items* 0 'yes))
 (define list-2 (tree->keys tree-2))
 (define hashmap-1 (let ((table (make-eq-hashtable)))
 		    (for-each (lambda (x)
@@ -44,14 +46,19 @@
     table))
 
 (define (time-patricia-merge)
-  (time (tree-size (merge-with + tree-1 tree-2))))
+  (collect)
+  (time
+   (tree-size (merge-with + tree-1 tree-2))))
 (define (time-list-merge)
-  (time (length (lset-union = list-1 list-2))))
+  (collect)
+  (time
+   (length (lset-union = list-1 list-2))))
 (define (time-hashmap-merge)
-  (time (vector-length
-	 (hashtable-keys
-	  (merge-hashmaps hashmap-1
-			  hashmap-2)))))
+  (collect)
+  (time
+   (vector-length
+    (hashtable-keys
+     (merge-hashmaps hashmap-1 hashmap-2)))))
 
-(assert (= (length (lset-union = list-1 list-2))
-	   (tree-size (merge-with + tree-1 tree-2))))
+;;(assert (= (length (lset-union = list-1 list-2))
+;;	   (tree-size (merge-with + tree-1 tree-2))))

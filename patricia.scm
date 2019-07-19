@@ -28,19 +28,33 @@
 (define-record-type patricia
   (fields p b L R))
 
-(define-record-type patricia-leaf
-  (fields key item))
+(define make-patricia-leaf
+  (lambda (key item)
+    (cons key item)))
+
+(define patricia-leaf?
+  (lambda (l)
+    (or (integer? l)
+	(pair? l))))
+
+(define patricia-leaf-key
+  (lambda (l)
+    (car l)))
+
+(define patricia-leaf-item
+  (lambda (l)
+    (cdr l)))
 
 (define tree-equal?
-  (lambda (S T eql?)
+  (lambda (S T)
     (cond ((and (patricia? S) (patricia? T))
-	   (and (eql? (patricia-p S) (patricia-p T))
-		(eql? (patricia-b S) (patricia-b T))
-		(tree-equal? (patricia-L S) (patricia-L T) eql?)
-		(tree-equal? (patricia-R S) (patricia-R T) eql?)))
+	   (and (= (patricia-p S) (patricia-p T))
+		(= (patricia-b S) (patricia-b T))
+		(tree-equal? (patricia-L S) (patricia-L T))
+		(tree-equal? (patricia-R S) (patricia-R T))))
 	  ((and (patricia-leaf? S) (patricia-leaf? T))
-	   (and (eql? (patricia-leaf-key S) (patricia-leaf-key T))
-		(eql? (patricia-leaf-item S) (patricia-leaf-item T))))
+	   (and (= (patricia-leaf-key S) (patricia-leaf-key T))
+		(= (patricia-leaf-item S) (patricia-leaf-item T))))
 	  (else (and (empty? S) (empty? T))))))
 
 (define empty-tree 'empty-tree)
