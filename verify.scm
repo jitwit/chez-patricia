@@ -18,8 +18,8 @@
 		   (insert (random lim) n x)))))))
 
 ;; check random trees by comparing against srfi 1 and hashmaps
-(define *range* 7000000)
-(define *items* 150000)
+(define *range* 70000)
+(define *items* 15000)
 (define tree-1 (random-tree *range* *items* 0 'yes))
 (define list-1 (tree->keys tree-1))
 (define tree-2 (random-tree *range* *items* 0 'yes))
@@ -60,5 +60,20 @@
     (hashtable-keys
      (merge-hashmaps hashmap-1 hashmap-2)))))
 
-;;(assert (= (length (lset-union = list-1 list-2))
-;;	   (tree-size (merge-with + tree-1 tree-2))))
+(define (basic-tests)
+  (let ((s1 (tree-size tree-1))
+	(s2 (tree-size tree-2))
+	(s-union (tree-size (merge-with + tree-1 tree-2)))
+	(s-intersection (tree-size (intersect-with + tree-1 tree-2)))
+	(s-symmetric-diff (tree-size (symmetric-difference tree-1 tree-2)))
+	(s-diff (tree-size (difference tree-1 tree-2))))
+    (format #t "sizes:~%u: ~a~%i: ~a~%s: ~a~%d: ~a~%"
+	    s-union s-intersection s-symmetric-diff s-diff)
+    (format #t "checking union~%")
+    (assert (= s-union (length (lset-union = list-1 list-2))))
+    (format #t "checking intersection~%")
+    (assert (= s-intersection (length (lset-intersection = list-1 list-2))))
+    (format #t "checking symmetric difference~%")
+    (assert (= s-symmetric-diff (length (lset-xor = list-1 list-2))))
+    (format #t "checking difference~%")
+    (assert (= s-diff (length (lset-difference = list-1 list-2))))))

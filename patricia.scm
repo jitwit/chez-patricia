@@ -16,6 +16,8 @@
        (= (logbit0 b (logor k (1- (ash 1 b))))
 	  p)))))
 
+(define branch-bit-set? logbit?)
+
 ;; branching bit: first bit where p1 p2 disagree
 (define branching-bit
   (lambda (p1 p2)
@@ -68,7 +70,7 @@
   (lambda (p1 T1 p2 T2)
     (let* ((b (branching-bit p1 p2))
 	   (new-prefix (mask p1 b)))
-      (if (logbit? b p1)
+      (if (branch-bit-set? b p1)
 	  (make-patricia new-prefix b T2 T1)
 	  (make-patricia new-prefix b T1 T2)))))
 
@@ -151,11 +153,11 @@
 	       (cond ((and (= p q) (= b c))
 		      (make-patricia p b (aux Sl Tl) (aux Sr Tr)))
 		     ((and (< b c) (match-prefix p q c))
-		      (if (logbit? c p)
+		      (if (branch-bit-set? c p)
 			  (make-patricia q c Tl (aux S Tr))
 			  (make-patricia q c (aux Tl S) Tr)));; Tl before s?
 		     ((and (< c b) (match-prefix q p b))
-		      (if (logbit? b q)
+		      (if (branch-bit-set? b q)
 			  (make-patricia p b Sl (aux Sr T))
 			  (make-patricia p b (aux Sl T) Sr)))
 		     (else (join p S q T)))))))
@@ -254,7 +256,7 @@
     (merge-with (lambda (x y)
 		  (error 'symmetric-difference
 			 "I should not be called!~%"
-			 S T x y))
+			 x y))
 		(difference S T)
 		(difference T S))))
 
