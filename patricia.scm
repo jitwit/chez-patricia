@@ -177,10 +177,9 @@
 		       (make-tree p b L (aux R)))
 		   T)))
 	    ((patricia-leaf? T)
-	     (let ((j (patricia-leaf-key T)))
-	       (if (= key j)
-		   empty-tree
-		   T)))
+	     (if (= key (patricia-leaf-key T))
+		 empty-tree
+		 T))
 	    (else T)))
     (aux T)))
 
