@@ -18,8 +18,8 @@
 		   (insert (random lim) n x)))))))
 
 ;; check random trees by comparing against srfi 1 and hashmaps
-(define *range* 70000)
-(define *items* 15000)
+(define *range* 700000)
+(define *items* 150000)
 (define tree-1 (random-tree *range* *items* 0 'yes))
 (define list-1 (tree->keys tree-1))
 (define tree-2 (random-tree *range* *items* 0 'yes))
