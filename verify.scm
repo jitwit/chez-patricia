@@ -1,6 +1,6 @@
 ;; ad hoc tests/benchmarks
 (import (srfi :1)
-	(chez patricia))
+	(chez patricia-fx))
 
 ;; ratio of lookups/insertions. also for benching
 (define (random-tree lim trials ratio . verbose?)

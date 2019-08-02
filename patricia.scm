@@ -1,29 +1,4 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Bit goods                                                                  ;;
-
-(define mask
-  (lambda (k b)
-    (logbit0 b (logor k (1- (ash 1 b))))))
-
-(define-syntax match-prefix
-  (syntax-rules ()
-    ((_ k p b)
-     (= (logbit0 b (logor k (1- (ash 1 b))))
-	p))
-    ((_ k T)
-     (let ((b (patricia-b T))
-	   (p (patricia-p T)))
-       (= (logbit0 b (logor k (1- (ash 1 b))))
-	  p)))))
-
-(define branch-bit-set? logbit?)
-
-;; branching bit: first bit where p1 p2 disagree
-(define branching-bit
-  (lambda (p1 p2)
-    (1- (bitwise-length (logxor p1 p2)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Data type and constructors                                                 ;;
 
 ;; p for prefix, b for branching bit, capital letter to indicate sub-structure
@@ -50,13 +25,13 @@
 (define tree-equal?
   (lambda (S T)
     (cond ((and (patricia? S) (patricia? T))
-	   (and (= (patricia-p S) (patricia-p T))
-		(= (patricia-b S) (patricia-b T))
+	   (and (p= (patricia-p S) (patricia-p T))
+		(p= (patricia-b S) (patricia-b T))
 		(tree-equal? (patricia-L S) (patricia-L T))
 		(tree-equal? (patricia-R S) (patricia-R T))))
 	  ((and (patricia-leaf? S) (patricia-leaf? T))
-	   (and (= (patricia-leaf-key S) (patricia-leaf-key T))
-		(= (patricia-leaf-item S) (patricia-leaf-item T))))
+	   (and (p= (patricia-leaf-key S) (patricia-leaf-key T))
+		(p= (patricia-leaf-item S) (patricia-leaf-item T))))
 	  (else (and (empty? S) (empty? T))))))
 
 (define empty-tree 'empty-tree)
@@ -94,11 +69,11 @@
   (lambda (key Tree)
     (if (patricia? Tree)
 	(and (match-prefix key Tree)
-	     (if (<= key (patricia-p Tree)) 
+	     (if (p<= key (patricia-p Tree)) 
 		 (lookup key (patricia-L Tree)) 
 		 (lookup key (patricia-R Tree))))
 	(and (patricia-leaf? Tree)
-	     (= key (patricia-leaf-key Tree))
+	     (p= key (patricia-leaf-key Tree))
 	     (leaf->pair Tree)))))
 
 (define lookup-with-default
@@ -119,13 +94,13 @@
 		   (L (patricia-L T))
 		   (R (patricia-R T)))
 	       (if (match-prefix key T)
-		   (if (<= key p)
+		   (if (p<= key p)
 		       (make-patricia p b (aux L) R)
 		       (make-patricia p b L (aux R)))
 		   (join key (make-patricia-leaf key item) p T))))
 	    ((patricia-leaf? T)
 	     (let ((j (patricia-leaf-key T)))
-	       (if (= key j)
+	       (if (p= key j)
 		   (make-patricia-leaf key (combine item (patricia-leaf-item T)))
 		   (join j T key (make-patricia-leaf key item)))))
 	    (else (make-patricia-leaf key item))))
@@ -155,13 +130,13 @@
 		   (c (patricia-b T))
 		   (Tl (patricia-L T))
 		   (Tr (patricia-R T)))
-	       (cond ((and (= p q) (= b c))
+	       (cond ((and (p= p q) (p= b c))
 		      (make-patricia p b (aux Sl Tl) (aux Sr Tr)))
-		     ((and (< b c) (match-prefix p q c))
+		     ((and (p< b c) (match-prefix p q c))
 		      (if (branch-bit-set? c p)
 			  (make-patricia q c Tl (aux S Tr))
 			  (make-patricia q c (aux Tl S) Tr)));; Tl before s?
-		     ((and (< c b) (match-prefix q p b))
+		     ((and (p< c b) (match-prefix q p b))
 		      (if (branch-bit-set? b q)
 			  (make-patricia p b Sl (aux Sr T))
 			  (make-patricia p b (aux Sl T) Sr)))
@@ -177,12 +152,12 @@
 		   (L (patricia-L T))
 		   (R (patricia-R T)))
 	       (if (match-prefix key T)
-		   (if (<= key p)
+		   (if (p<= key p)
 		       (make-tree p b (aux L) R)
 		       (make-tree p b L (aux R)))
 		   T)))
 	    ((patricia-leaf? T)
-	     (if (= key (patricia-leaf-key T))
+	     (if (p= key (patricia-leaf-key T))
 		 empty-tree
 		 T))
 	    (else T)))
@@ -216,13 +191,13 @@
 		   (c (patricia-b T))
 		   (Tl (patricia-L T))
 		   (Tr (patricia-R T)))
-	       (cond ((and (= p q) (= b c))
+	       (cond ((and (= p q) (p= b c))
 		      (make-tree p b (aux Sl Tl) (aux Sr Tr)))
-		     ((and (< b c) (match-prefix p q c))
+		     ((and (p< b c) (match-prefix p q c))
 		      (if (branch-bit-set? c p)
 			  (aux S Tr)
 			  (aux S Tl)))
-		     ((and (< c b) (match-prefix q p b))
+		     ((and (p< c b) (match-prefix q p b))
 		      (if (branch-bit-set? b q)
 			  (aux Sr T)
 			  (aux Sl T)))
@@ -250,13 +225,13 @@
 		   (c (patricia-b T))
 		   (Tl (patricia-L T))
 		   (Tr (patricia-R T)))
-	       (cond ((and (= p q) (= b c))
+	       (cond ((and (p= p q) (p= b c))
 		      (make-tree p b (aux Sl Tl) (aux Sr Tr)))
-		     ((and (< b c) (match-prefix p q c))
+		     ((and (p< b c) (match-prefix p q c))
 		      (if (branch-bit-set? c p)
 			  (aux S Tr)
 			  (aux S Tl)))
-		     ((and (< c b) (match-prefix q p b))
+		     ((and (p< c b) (match-prefix q p b))
 		      (if (branch-bit-set? b q)
 			  (make-tree p b Sl (aux Sr T))
 			  (make-tree p b (aux Sl T) Sr)))
@@ -444,21 +419,21 @@
 (define predecessor
   (lambda (key T)
     (if (patricia? T)
-	(if (< (patricia-p T) key)
+	(if (p< (patricia-p T) key)
 	    (or (predecessor key (patricia-R T))
 		(predecessor key (patricia-L T)))
 	    (predecessor key (patricia-L T)))
-	(and (< (patricia-leaf-key T) key)
+	(and (p< (patricia-leaf-key T) key)
 	     (leaf->pair T)))))
 
 (define successor
   (lambda (key T)
     (if (patricia? T)
-	(if (<= (patricia-p T) key)
+	(if (p<= (patricia-p T) key)
 	    (successor key (patricia-R T))
 	    (or (successor key (patricia-L T))
 		(successor key (patricia-R T))))
-	(and (< key (patricia-leaf-key T))
+	(and (p< key (patricia-leaf-key T))
 	     (leaf->pair T)))))
 
 (define tree-sort
