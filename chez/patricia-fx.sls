@@ -7,6 +7,7 @@
 	  tree-equal?
 	  empty?
 	  lookup
+	  lookup-with-default
 	  insert-with
 	  insert
 	  delete

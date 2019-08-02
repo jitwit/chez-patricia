@@ -1,5 +1,3 @@
-
-
 (define mask
   (lambda (k b)
     (fxlogbit0 b (fxlogor k (fx1- (fxsll 1 b))))))
