@@ -25,14 +25,14 @@
   #+end_src 
 
   #+RESULTS:
-  : (view-tree tree-size maximum minimum predecessor successor
-  :  tree-imap tree-map tree-for-each tree-ifold-right
-  :  tree-ifold-left tree-fold-left tree-fold-right tree-filter
-  :  tree-ifilter tree->items tree->keys tree->alist singleton
-  :  symmetric-difference difference intersection-with
-  :  intersect-with union-with merge-with delete insert
-  :  insert-with lookup empty? tree-equal? patricia-tree?
-  :  empty-tree)
+  : (view-tree tree-size maximum minimum split> split<
+  :  predecessor successor tree-imap tree-map tree-for-each
+  :  tree-ifold-right tree-ifold-left tree-fold-left
+  :  tree-fold-right tree-filter tree-ifilter tree->items
+  :  tree->keys tree->alist singleton symmetric-difference
+  :  difference intersection-with intersect-with union-with
+  :  merge-with delete insert insert-with lookup-with-default
+  :  lookup empty? tree-equal? patricia-tree? empty-tree)
 
 
   Here is an example that illustrates how it works. ~view-tree~
@@ -49,7 +49,7 @@
   (list->tree '(3 4 12 14)))
 
 (define Y
-  (list->tree '(1 3 4 12 15)))
+  (list->tree '(1 3 4 12 19)))
 
 (view-tree X)
   #+end_src 
@@ -80,8 +80,8 @@
  #+end_src
 
   #+RESULTS:
-  : ((3 4 12 14) (1 3 4 12 15) (3 4 12) (1 3 4 12 14 15) (14)
-  :   (1 15) (1 14 15))
+  : ((3 4 12 14) (1 3 4 12 19) (3 4 12) (1 3 4 12 14 19) (14)
+  :   (1 19) (1 14 19))
 
   Folds:
  #+begin_src scheme :exports both :session patricia

@@ -436,6 +436,40 @@
 	(and (p< key (patricia-leaf-key T))
 	     (leaf->pair T)))))
 
+(define split<
+  (lambda (cutoff T)
+    (letrec ((aux (lambda (T)
+		    (cond ((patricia? T)
+			   (if (p< (patricia-p T) cutoff)
+			       (make-tree (patricia-p T)
+					  (patricia-b T)
+					  (patricia-L T)
+					  (aux (patricia-R T)))
+			       (aux (patricia-L T))))
+			  ((patricia-leaf? T)
+			   (if (p< cutoff (patricia-leaf-key T))
+			       empty-tree
+			       T))
+			  (else T)))))
+      (aux T))))
+
+(define split>
+  (lambda (cutoff T)
+    (letrec ((aux (lambda (T)
+		    (cond ((patricia? T)
+			   (if (p< cutoff (patricia-p T))
+			       (make-tree (patricia-p T)
+					  (patricia-b T)
+					  (aux (patricia-L T))
+					  (patricia-R T))
+			       (aux (patricia-R T))))
+			  ((patricia-leaf? T)
+			   (if (p< cutoff (patricia-leaf-key T))
+			       T
+			       empty-tree))
+			  (else T)))))
+      (aux T))))
+
 (define tree-sort
   (lambda (X)
     (fold-right (lambda (x y)

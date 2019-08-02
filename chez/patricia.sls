@@ -32,6 +32,8 @@
 	  tree-imap
 	  successor
 	  predecessor
+	  split<
+	  split>
 	  minimum
 	  maximum
 	  tree-size
