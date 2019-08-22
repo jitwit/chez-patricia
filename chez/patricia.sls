@@ -41,5 +41,4 @@
 	  view-tree)
   (import (chezscheme))
 
-  (include "bit.scm")
   (include "patricia.scm"))

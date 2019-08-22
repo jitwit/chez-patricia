@@ -20,7 +20,6 @@ schemedir = ${LIBDIR}/csv${chezversion}-site
 
 build:
 	echo "(compile-library \"chez/patricia.sls\")" | ${CHEZ} -q
-	echo "(compile-library \"chez/patricia-fx.sls\")" | ${CHEZ} -q
 	echo "(compile-library \"chez/patricia-set.sls\")" | ${CHEZ} -q
 
 install:
