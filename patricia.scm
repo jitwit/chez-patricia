@@ -106,6 +106,27 @@
 	    (else (make-patricia-leaf key item))))
     (aux T)))
 
+(define modify
+  (lambda (proc key T)
+    (define (aux T)
+      (cond ((patricia? T)
+	     (let ((b (patricia-b T))
+		   (p (patricia-p T))
+		   (L (patricia-L T))
+		   (R (patricia-R T)))
+	       (if (match-prefix key T)
+		   (if (p<= key p)
+		       (make-patricia p b (aux L) R)
+		       (make-patricia p b L (aux R)))
+		   T)))
+	    ((patricia-leaf? T)
+	     (let ((j (patricia-leaf-key T)))
+	       (if (p= key j)
+		   (make-patricia-leaf key (proc (patricia-leaf-item T)))
+		   T)))
+	    (else T)))
+    (aux T)))
+
 (define merge-with
   (lambda (combine S T)
     (define (aux S T)

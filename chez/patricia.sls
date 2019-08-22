@@ -10,6 +10,7 @@
 	  lookup-with-default
 	  insert-with
 	  insert
+	  modify
 	  delete
 	  merge-with
 	  union-with
